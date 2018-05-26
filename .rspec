@@ -1,0 +1,4 @@
+--format documentation
+--color
+--format RSpec::Buildkite::AnnotationFormatter
+--require spec_helper

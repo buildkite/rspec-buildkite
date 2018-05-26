@@ -1,0 +1,17 @@
+sudo: false
+language: ruby
+rvm:
+- 2.1
+- 2.2
+- 2.3
+- 2.3
+- 2.5
+gemfile:
+- gemfiles/rspec_3_0.gemfile
+- gemfiles/rspec_3_1.gemfile
+- gemfiles/rspec_3_2.gemfile
+- gemfiles/rspec_3_3.gemfile
+- gemfiles/rspec_3_4.gemfile
+- gemfiles/rspec_3_5.gemfile
+- gemfiles/rspec_3_6.gemfile
+- gemfiles/rspec_3_7.gemfile
