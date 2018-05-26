@@ -1,6 +1,7 @@
 require "thread"
 
 require "rspec/core"
+require "rspec/buildkite/recolorizer"
 
 module RSpec::Buildkite
   # Create a Buildkite annotation for RSpec failures
@@ -56,56 +57,10 @@ module RSpec::Buildkite
 
       "<details>\n" <<
       "<summary>#{notification.description.encode(:xml => :text)}</summary>\n\n" <<
-      "<code><pre>#{recolorize(notification.colorized_message_lines.join("\n").encode(:xml => :text))}</pre></code>\n\n" <<
+      "<code><pre>#{Recolorizer.recolorize(notification.colorized_message_lines.join("\n").encode(:xml => :text))}</pre></code>\n\n" <<
       %{in <a href=#{job_url.encode(:xml => :attr)}>Job ##{job_id.encode(:xml => :text)}</a>\n} <<
       "</details>" <<
       "\n\n\n"
-    end
-
-    private
-
-    # Re-color an ANSI-colorized string using terminal CSS classes:
-    # https://github.com/buildkite/terminal/blob/05a77905c468b9150cac41298fdb8a0735024d42/style.go#L34
-    def recolorize(string)
-      level = 0
-      string.gsub(/\e\[(\d+(?:;\d+)*)m/) do
-        "".tap do |buffer|
-          codes = $1.split(";").map(&:to_i)
-
-          classes = []
-          while code = codes.shift
-            case code
-            when 0
-              classes.clear
-              buffer << ("</span>" * level)
-              level = 0
-            when 1..5, 9, 30..37, 90..97
-              classes << "term-fg#{code}"
-            when 40..47, 100..107
-              classes << "term-bg#{code}"
-            when 38
-              if codes[0] == 5
-                codes.shift
-                if codes[0]
-                  classes << "term-fgx#{codes.shift}"
-                end
-              end
-            when 48
-              if codes[0] == 5
-                codes.shift
-                if codes[0]
-                  classes << "term-bgx#{codes.shift}"
-                end
-              end
-            end
-          end
-
-          if classes.any?
-            level += 1
-            buffer << %{<span class=#{classes.map { |klass| klass }.join(" ").encode(:xml => :attr)}>}
-          end
-        end
-      end << ("</span>" * level)
     end
   end
 end
