@@ -38,6 +38,24 @@ Add it to your `.rspec` alongside your favorite formatter:
 
 Now run your specs on Buildkite!
 
+### Docker & Docker Compose
+
+If you run your RSpec builds inside Docker or Docker Compose, for example using [the docker-compose-buildkite-plugin][dcbp], then you'll need to make sure some environment variables are progpagated into the running containers. You can add something like this to your `docker-compose.yml`:
+
+```yaml
+services:
+  app:
+    # ...
+    environment:
+      # for rspec-buildkite
+      BUILDKITE:
+      BUILDKITE_BUILD_URL:
+      BUILDKITE_JOB_ID:
+      BUILDKITE_AGENT_ACCESS_TOKEN:
+```
+
+  [dcbp]: https://github.com/buildkite-plugins/docker-compose-buildkite-plugin
+
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
