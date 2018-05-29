@@ -40,21 +40,19 @@ Now run your specs on Buildkite!
 
 ### Docker & Docker Compose
 
-If you run your RSpec builds inside Docker or Docker Compose, for example using [the docker-compose-buildkite-plugin][dcbp], then you'll need to make sure some environment variables are progpagated into the running containers. You can add something like this to your `docker-compose.yml`:
+If you run your RSpec builds inside Docker or Docker Compose then you'll need to make sure some environment variables are progpagated into the running containers. If you're using [the docker-compose-buildkite-plugin][dcbp] you can pass the environment using [plugin configuration][dcbp-env]. Or you can add them to the [environment section][dc-env] in your `docker-compose.yml`, or supply [env arguments][d-env] to your docker command.
 
-```yaml
-services:
-  app:
-    # ...
-    environment:
-      # for rspec-buildkite
-      BUILDKITE:
-      BUILDKITE_BUILD_URL:
-      BUILDKITE_JOB_ID:
-      BUILDKITE_AGENT_ACCESS_TOKEN:
-```
+The following environment variables are required:
+
+- `BUILDKITE`
+- `BUILDKITE_BUILD_URL`
+- `BUILDKITE_JOB_ID`
+- `BUILDKITE_AGENT_ACCESS_TOKEN`
 
   [dcbp]: https://github.com/buildkite-plugins/docker-compose-buildkite-plugin
+  [dcbp-env]: https://github.com/buildkite-plugins/docker-compose-buildkite-plugin#environment
+  [dc-env]: https://docs.docker.com/compose/environment-variables/
+  [d-env]: https://docs.docker.com/engine/reference/run/#env-environment-variables
 
 ## Development
 
