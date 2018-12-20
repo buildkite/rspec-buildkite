@@ -1,3 +1,4 @@
+require "pathname"
 require "thread"
 
 require "rspec/core"
@@ -37,11 +38,15 @@ module RSpec::Buildkite
         break if notification == :close
 
         if notification
+          if screenshot = notification.example.metadata[:screenshot]
+            screenshot = prepare_screenshot(screenshot)
+          end
+
           system "buildkite-agent", "annotate",
             "--context", "rspec",
             "--style", "error",
             "--append",
-            format_failure(notification),
+            format_failure(notification, screenshot: screenshot),
             out: :close # only display errors
         end
       end
@@ -50,7 +55,28 @@ module RSpec::Buildkite
       puts "  " << $!.to_s, "    " << $!.backtrace.join("\n    ")
     end
 
-    def format_failure(notification)
+    def prepare_screenshot(screenshot)
+      # Take only image and html screenshots
+      screenshot = screenshot.slice(:image, :html)
+
+      # Make sure they're relative paths
+      screenshot.transform_values do |path|
+        Pathname.new(File.expand_path(path)).relative_path_from(Dir.pwd)
+      end
+
+      # Upload them as artifacts
+      screenshot.each do |_, path|
+        system "buildkite-agent", "artifact", "upload", path,
+          out: :close # only display errors
+      end
+
+      # And turn them into artifact URLs
+      screenshot.transform_values do |path|
+        "artifact://#{path}"
+      end
+    end
+
+    def format_failure(notification, screenshot: nil)
       build_url = ENV["BUILDKITE_BUILD_URL"].to_s
       job_id = ENV["BUILDKITE_JOB_ID"].to_s
       job_url = "#{build_url}##{job_id}"
@@ -58,10 +84,15 @@ module RSpec::Buildkite
       %{<details>\n} <<
       %{<summary>#{notification.description.encode(:xml => :text)}</summary>\n} <<
       %{<pre class="term">#{Recolorizer.recolorize(notification.colorized_message_lines.join("\n").encode(:xml => :text))}</pre>\n} <<
+      %{#{format_screenshot(screenshot) if screenshot}} <<
       %{<pre class="term">rspec #{notification.example.location_rerun_argument.encode(:xml => :text)}</pre>\n} <<
       %{<p>in <a href=#{job_url.encode(:xml => :attr)}>Job ##{job_id.encode(:xml => :text)}</a></p>\n} <<
       %{</details>} <<
       %{\n\n\n}
+    end
+
+    def format_screenshot(image: nil, html: nil, **)
+      %{<p>Screenshot: #{[%{<a href=#{image.encode(:xml => :attr)}>Image</a>}, %{<a href=#{image.encode(:xml => :attr)}>HTML</a>}].compact.join(", ")}</p>\n}
     end
   end
 end
