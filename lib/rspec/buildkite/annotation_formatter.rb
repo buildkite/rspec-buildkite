@@ -56,9 +56,10 @@ module RSpec::Buildkite
       job_url = "#{build_url}##{job_id}"
 
       %{<details>\n} <<
-      %{<summary>#{notification.description.encode(:xml => :text)}</summary>\n\n} <<
-      %{<code><pre class="term">#{Recolorizer.recolorize(notification.colorized_message_lines.join("\n").encode(:xml => :text))}</pre></code>\n\n} <<
-      %{in <a href=#{job_url.encode(:xml => :attr)}>Job ##{job_id.encode(:xml => :text)}</a>\n} <<
+      %{<summary>#{notification.description.encode(:xml => :text)}</summary>\n} <<
+      %{<pre class="term">#{Recolorizer.recolorize(notification.colorized_message_lines.join("\n").encode(:xml => :text))}</pre>\n} <<
+      %{<pre class="term">rspec #{notification.example.location_rerun_argument.encode(:xml => :text)}</pre>\n} <<
+      %{<p>in <a href=#{job_url.encode(:xml => :attr)}>Job ##{job_id.encode(:xml => :text)}</a></p>\n} <<
       %{</details>} <<
       %{\n\n\n}
     end
