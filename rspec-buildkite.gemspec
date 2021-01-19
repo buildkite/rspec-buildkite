@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.email         = "sj26@sj26.com"
 
   spec.summary       = %q{RSpec formatter creating Buildkite annotations for failures}
-  spec.homepage      = "https://github.com/sj26/rspec-buildkite"
+  spec.homepage      = "https://github.com/buildkite/rspec-buildkite"
   spec.license       = "MIT"
 
   spec.files         = Dir["README.md", "LICENSE.txt", "lib/**/*"]
