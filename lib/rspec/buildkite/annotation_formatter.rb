@@ -37,17 +37,18 @@ module RSpec::Buildkite
         break if notification == :close
 
         if notification
-          system "buildkite-agent", "annotate",
+          system("buildkite-agent", "annotate",
             "--context", "rspec",
             "--style", "error",
             "--append",
             format_failure(notification),
             out: :close # only display errors
+          ) or raise "buildkite-agent failed to run: #{$?}#{" (command not found)" if $?.exitstatus == 127}"
         end
       end
     rescue
       $stderr.puts "Warning: Couldn't create Buildkite annotations:\n" <<
-        "  ${$!.to_s}\n" <<
+        "  #{$!.to_s}\n" <<
         "    #{$!.backtrace.join("\n    ")}"
     end
 
