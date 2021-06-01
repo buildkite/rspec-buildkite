@@ -46,8 +46,8 @@ module RSpec::Buildkite
         end
       end
     rescue
-      puts "Warning: Couldn't create Buildkite annotations:"
-      puts "  " << $!.to_s, "    " << $!.backtrace.join("\n    ")
+      $stderr.puts "Warning: Couldn't create Buildkite annotations:"
+      $stderr.puts "  " << $!.to_s, "    " << $!.backtrace.join("\n    ")
     end
 
     def format_failure(notification)
