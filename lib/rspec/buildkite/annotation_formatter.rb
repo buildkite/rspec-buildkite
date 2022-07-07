@@ -27,7 +27,9 @@ module RSpec::Buildkite
     end
 
     def example_failed(notification)
-      @queue.push(notification) if @queue
+      return if @queue.nil? || RSpec.world.wants_to_quit
+
+      @queue.push(notification)
     end
 
     private
