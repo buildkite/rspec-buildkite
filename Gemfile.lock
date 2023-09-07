@@ -41,4 +41,4 @@ DEPENDENCIES
   rspec-buildkite!
 
 BUNDLED WITH
-   1.17.1
+   2.4.19

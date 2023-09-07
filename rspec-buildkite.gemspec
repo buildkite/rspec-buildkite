@@ -14,7 +14,7 @@ Gem::Specification.new do |spec|
 
   spec.files         = Dir["README.md", "LICENSE.txt", "lib/**/*"]
 
-  spec.required_ruby_version = "~> 2.2"
+  spec.required_ruby_version = ">= 2.2", "< 4"
 
   spec.add_dependency "rspec-core", "~> 3.0"
 
