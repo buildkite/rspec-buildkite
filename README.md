@@ -40,7 +40,7 @@ Now run your specs on Buildkite!
 
 ### Docker & Docker Compose
 
-If you run your RSpec builds inside Docker or Docker Compose then you'll need to make sure that buildkite-agent is available inside your container, and that some environment variables are propagated into the running containers. The buildkite-agent binary can be baked into your image, or mounted in as a volume. If you're using [the docker-compose-buildkite-plugin][dcbp] you can pass the environment using [plugin configuration][dcbp-env]. Or you can add them to the [environment section][dc-env] in your `docker-compose.yml`, or supply [env arguments][d-env] to your docker command.
+If you run your RSpec builds inside Docker or Docker Compose then you'll need to make sure that some environment variables are propagated into the running containers. If you're using [the docker-compose-buildkite-plugin][dcbp] you can pass the environment using [plugin configuration][dcbp-env]. Or you can add them to the [environment section][dc-env] in your `docker-compose.yml`, or supply [env arguments][d-env] to your docker command.
 
 The following environment variables are required:
 

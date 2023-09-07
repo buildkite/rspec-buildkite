@@ -1,7 +1,10 @@
+require "json"
+require "net/http"
 require "thread"
 
 require "rspec/core"
 require "rspec/buildkite/recolorizer"
+require "rspec/buildkite/version"
 
 module RSpec::Buildkite
   # Create a Buildkite annotation for RSpec failures
@@ -34,18 +37,28 @@ module RSpec::Buildkite
 
     private
 
+    def agent_endpoint
+      ENV.fetch("BUILDKITE_AGENT_ENDPOINT", "https://agent.buildkite.com")
+    end
+
     def thread
       while notification = @queue.pop
         break if notification == :close
 
         if notification
-          system("buildkite-agent", "annotate",
-            "--context", "rspec",
-            "--style", "error",
-            "--append",
-            format_failure(notification),
-            out: :close # only display errors
-          ) or raise "buildkite-agent failed to run: #{$?}#{" (command not found)" if $?.exitstatus == 127}"
+          uri = URI.join(agent_endpoint, "v3/jobs/#{ENV.fetch("BUILDKITE_JOB_ID")}/annotations")
+          headers = {
+            "Authorization" => "Token #{ENV.fetch("BUILDKITE_AGENT_ACCESS_TOKEN")}",
+            "User-Agent" => "rspec-buildkite/#{RSpec::Buildkite::VERSION}",
+          }
+          params = {
+            context: "rspec",
+            style: "error",
+            append: true,
+            body: format_failure(notification),
+          }
+
+          Net::HTTP.post(uri, JSON.dump(params), headers).value
         end
       end
     rescue
