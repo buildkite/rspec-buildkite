@@ -40,7 +40,7 @@ module RSpec::Buildkite
 
         if notification
           system("buildkite-agent", "annotate",
-            "--context", "rspec",
+            "--context", "rspec-#{ENV["BUILDKITE_STEP_KEY"]}",
             "--style", "error",
             "--append",
             format_failure(notification),
@@ -57,13 +57,21 @@ module RSpec::Buildkite
     def format_failure(notification)
       build_url = ENV["BUILDKITE_BUILD_URL"].to_s
       job_id = ENV["BUILDKITE_JOB_ID"].to_s
+      step_name = "Job ##{job_id.encode(:xml => :text)} "
+
+      if ENV["BUILDKITE_LABEL"]
+        step_name = ENV["BUILDKITE_LABEL"]
+        if ENV["BUILDKITE_PARALLEL_JOB"] && ENV["BUILDKITE_PARALLEL_JOB_COUNT"]
+          step_name += " (#{ENV["BUILDKITE_PARALLEL_JOB"]}/#{ENV["BUILDKITE_PARALLEL_JOB_COUNT"]})"
+        end
+      end
       job_url = "#{build_url}##{job_id}"
 
       %{<details>\n} <<
       %{<summary>#{notification.description.encode(:xml => :text)}</summary>\n} <<
       %{<pre class="term">#{Recolorizer.recolorize(notification.colorized_message_lines.join("\n").encode(:xml => :text))}</pre>\n} <<
       format_rerun(notification) <<
-      %{<p>in <a href=#{job_url.encode(:xml => :attr)}>Job ##{job_id.encode(:xml => :text)}</a></p>\n} <<
+      %{<p>in <a href=#{job_url.encode(:xml => :attr)}>#{step_name}</a></p>\n} <<
       %{</details>} <<
       %{\n\n\n}
     end
