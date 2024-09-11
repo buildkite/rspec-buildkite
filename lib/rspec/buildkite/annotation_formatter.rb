@@ -12,7 +12,7 @@ module RSpec::Buildkite
   # Uses a background Thread so we don't block the build.
   #
   class AnnotationFormatter
-    RSpec::Core::Formatters.register self, :example_failed
+    RSpec::Core::Formatters.register self, :example_passed, :example_failed
 
     def initialize(output)
       # We don't actually use this, but keep a reference anyway
@@ -26,8 +26,15 @@ module RSpec::Buildkite
       end
     end
 
+    def example_passed(notification)
+      return if @queue.nil? || RSpec.world.wants_to_quit
+
+      @queue.push(notification) if RSpec.configuration.only_failures?
+    end
+
     def example_failed(notification)
       return if @queue.nil? || RSpec.world.wants_to_quit
+
 
       @queue.push(notification)
     end
@@ -39,11 +46,17 @@ module RSpec::Buildkite
         break if notification == :close
 
         if notification
+          annotation_content = if notification.is_a?(RSpec::Core::Notifications::FailedExampleNotification)
+            format_failure(notification)
+          else
+            format_passed_on_retry(notification)
+          end
+
           system("buildkite-agent", "annotate",
             "--context", "rspec",
             "--style", "error",
             "--append",
-            format_failure(notification),
+            annotation_content,
             out: :close # only display errors
           ) or raise "buildkite-agent failed to run: #{$?}#{" (command not found)" if $?.exitstatus == 127}"
         end
@@ -58,7 +71,6 @@ module RSpec::Buildkite
       build_url = ENV["BUILDKITE_BUILD_URL"].to_s
       job_id = ENV["BUILDKITE_JOB_ID"].to_s
       job_url = "#{build_url}##{job_id}"
-
       %{<details>\n} <<
       %{<summary>#{notification.description.encode(:xml => :text)}</summary>\n} <<
       %{<pre class="term">#{Recolorizer.recolorize(notification.colorized_message_lines.join("\n").encode(:xml => :text))}</pre>\n} <<
@@ -73,6 +85,18 @@ module RSpec::Buildkite
       %{<span class="term-fg31">rspec #{notification.example.location_rerun_argument.encode(:xml => :text)}</span>} <<
       %{ <span class="term-fg36"># #{notification.example.full_description.encode(:xml => :text)}</span>} <<
       %{</pre>\n}
+    end
+
+    def format_passed_on_retry(notification)
+      build_url = ENV["BUILDKITE_BUILD_URL"].to_s
+      job_id = ENV["BUILDKITE_JOB_ID"].to_s
+      job_url = "#{build_url}##{job_id}"
+      %{<details>\n} <<
+      %{<summary>✅ #{notification.example.full_description.encode(:xml => :text)} <em>(Passed on retry)</em></summary>\n} <<
+      format_rerun(notification) <<
+      %{<p>in <a href=#{job_url.encode(:xml => :attr)}>Job ##{job_id.encode(:xml => :text)}</a></p>\n} <<
+      %{</details>} <<
+      %{\n\n\n}
     end
   end
 end
