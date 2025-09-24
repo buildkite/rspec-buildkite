@@ -1,4 +1,5 @@
 steps:
-  - command: bundle exec rake
+  - image: ruby
+    command: bundle exec rake
     env:
       BUNDLE_AUTO_INSTALL: true
