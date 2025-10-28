@@ -2,7 +2,7 @@
 
 Output [RSpec][rspec] failure messages as [Buildkite annotations][buildkite-annotations] as soon as they happen so you can fix them while your build finishes.
 
-![A Buildkite build still in progress with an annotation showing an RSpec failure][screenshot]
+[![A Buildkite build still in progress with an annotation showing an RSpec failure][screenshot]](https://buildkite.com/buildkite/rspec-buildkite)
 
   [rspec]: http://rspec.info
   [buildkite-annotations]: https://buildkite.com/docs/agent/v3/cli-annotate
