@@ -3,3 +3,4 @@ steps:
     command: bundle exec rake
     env:
       BUNDLE_AUTO_INSTALL: true
+      RUBYOPT: --enable-frozen-string-literal
