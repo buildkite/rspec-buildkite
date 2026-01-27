@@ -9,7 +9,7 @@ module RSpec::Buildkite
     def recolorize(string)
       level = 0
       string.gsub(/\e\[(\d+(?:;\d+)*)m/) do
-        "".tap do |buffer|
+        (+"").tap do |buffer|
           codes = $1.split(";").map(&:to_i)
 
           classes = []
